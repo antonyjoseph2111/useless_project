@@ -48,14 +48,11 @@ For Software:
 
 **Screenshots (Add at least 3)**
 
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows — e.g. the main input screen before translation*
+<img width="1280" height="640" alt="Real Cat Translator banner" src="https://github.com/antonyjoseph2111/useless_project/blob/main/Screenshot%202026-09-12%20051923.png" />
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows — e.g. translated cat text after clicking "Translate to Cat"*
+<img width="1280" height="640" alt="Real Cat Translator banner" src="https://github.com/antonyjoseph2111/useless_project/blob/main/Screenshot%202026-09-12%20052010.png" />
 
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows — e.g. status message while a real cat sound is playing*
+<img width="1280" height="640" alt="Real Cat Translator banner" src="https://github.com/antonyjoseph2111/useless_project/blob/main/Screenshot%202026-09-12%20052028.png" />
 
 **Diagrams**
 
