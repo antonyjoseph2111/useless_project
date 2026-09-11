@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Cat Translator 🐱</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: white;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      padding: 32px;
+      width: 100%;
+      max-width: 560px;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.9rem;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 26px;
+      font-size: 0.95rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+
+    textarea {
+      width: 100%;
+      height: 110px;
+      padding: 16px;
+      border-radius: 16px;
+      border: none;
+      background: rgba(0,0,0,0.35);
+      color: white;
+      font-size: 1.05rem;
+      resize: vertical;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-top: 14px;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .translate-btn {
+      background: #ff6b6b;
+      color: white;
+    }
+
+    .speak-btn {
+      background: #ffe66d;
+      color: #111;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.08);
+    }
+
+    .status {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 0.9rem;
+      color: #4ecdc4;
+      min-height: 22px;
+    }
+
+    .status.error {
+      color: #ff8787;
+    }
+
+    .note {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: #8a8fa3;
+      line-height: 1.4;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 0.8rem;
+      color: #777;
+    }
+
+    .footer a {
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🐱 Real Cat Translator</h1>
+    <p class="subtitle">English → real recorded cat sounds</p>
+
+    <div>
+      <label>English Text</label>
+      <textarea id="englishText" placeholder="Type anything in English..."></textarea>
+    </div>
+
+    <button class="translate-btn" onclick="translateToCat()">Translate to Cat</button>
+
+    <div style="margin-top: 18px;">
+      <label>Cat Language</label>
+      <textarea id="catText" placeholder="meow meow mrrrow..." readonly></textarea>
+    </div>
+
+    <button class="speak-btn" id="speakBtn" onclick="playMeows()">🔊 Play Real Cat Sounds</button>
+
+    <div class="status" id="status"></div>
+    <p class="note">One real cat sound per word you typed (capped at 10). Each clip is trimmed to a few seconds max, even if the original recording is longer. Needs an internet connection to Wikimedia — some embedded/preview panes block outbound requests entirely.</p>
+
+    <div class="footer">
+      Audio: <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a> (CC / public domain) · Made for TinkerHub Useless Projects
+    </div>
+  </div>
+
+  <script>
+    // Real, individually-checked cat sound recordings from Wikimedia Commons
+    // — a mix of meows, purrs, hisses/growls, and other genuine cat sounds
+    // (not human voice clips, not made-up filenames). Each entry notes what
+    // kind of sound it actually is. We resolve the current real file URL
+    // through Wikimedia's own API rather than hardcoding a CDN path, since
+    // those paths are content-hash based and can go stale.
+    const SOUND_FILES = [
+      // Meows
+      { title: "File:Meow.ogg", kind: "meow" },
+      { title: "File:Meow domestic cat.ogg", kind: "meow" },
+      { title: "File:Meow of a Siamese cat - freemaster2.wav", kind: "meow" },
+      { title: "File:Meow of a pleading cat.oga", kind: "meow" },
+      { title: "File:Miaulementcornisg.ogg", kind: "meow" },
+      { title: "File:Weibliche Britisch Kurzhaar will Futter C1277 MIAUEN.wav", kind: "meow" },
+      { title: "File:2015-11-24.νιαούρισμα.Νιάου.noise reduced.flac", kind: "meow" },
+      // Purrs
+      { title: "File:Cat Purring.ogg", kind: "purr" },
+      { title: "File:猫咪呼噜声.ogg", kind: "purr" },
+      { title: "File:Cat in front of open fire purring.ogg", kind: "purr" },
+      { title: "File:Bachgasse Wiki Lina Gebhardt and Anna Muck Cats Purring - Katzenschnurren.ogg", kind: "purr" },
+      // Hisses / growls
+      { title: "File:Cat hissing - Zabuhailo.wav", kind: "hiss" },
+      { title: "File:Gruñido gato (Chacha).ogg", kind: "growl" },
+      { title: "File:Gurren einer Katze.ogg", kind: "growl" },
+      // Other genuine cat sounds
+      { title: "File:Blue British Shorthair cat snoring 01.ogg", kind: "snore" }
+    ];
+    const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
+    const MAX_CLIP_SECONDS = 4.5; // keep even long real recordings reasonable
+
+    let resolvedSounds = [];   // [{url, kind}]
+    let resolving = null;
+    let preparedSounds = [];   // this translation's chosen clip list
+    let isPlaying = false;
+
+    function setStatus(text, isError) {
+      const el = document.getElementById("status");
+      el.textContent = text;
+      el.classList.toggle("error", !!isError);
+    }
+
+    async function resolveSounds() {
+      if (resolvedSounds.length > 0) return resolvedSounds;
+      if (resolving) return resolving;
+
+      resolving = (async () => {
+        try {
+          const titles = SOUND_FILES.map(f => f.title);
+          const params = new URLSearchParams({
+            action: "query",
+            titles: titles.join("|"),
+            prop: "imageinfo",
+            iiprop: "url",
+            format: "json",
+            origin: "*"
+          });
+          const res = await fetch(`${COMMONS_API}?${params.toString()}`);
+          if (!res.ok) throw new Error(`API responded ${res.status}`);
+          const data = await res.json();
+          const pages = data?.query?.pages || {};
+
+          const byNormalizedTitle = {};
+          Object.values(pages).forEach(p => {
+            const url = p?.imageinfo?.[0]?.url;
+            if (p?.title && url) byNormalizedTitle[p.title] = url;
+          });
+
+          const results = [];
+          SOUND_FILES.forEach(f => {
+            const url = byNormalizedTitle[f.title];
+            if (url) results.push({ url, kind: f.kind });
+          });
+
+          resolvedSounds = results;
+          return results;
+        } catch (err) {
+          console.log("Wikimedia lookup failed:", err);
+          return [];
+        }
+      })();
+
+      return resolving;
+    }
+
+    // Minimal fallback tone (not meant to sound like a real cat) used only
+    // if the browser genuinely can't reach the internet.
+    function playFallbackBeep() {
+      return new Promise((resolve) => {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const now = ctx.currentTime;
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(300, now + 0.2);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+          osc.connect(gain).connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.2);
+          osc.onended = () => { ctx.close(); resolve(); };
+        } catch (err) {
+          resolve();
+        }
+      });
+    }
+
+    async function translateToCat() {
+      const text = document.getElementById("englishText").value.trim();
+      if (!text) {
+        setStatus("Please type something first", true);
+        return;
+      }
+
+      // One cat sound per word, capped so very long input doesn't trigger
+      // a huge playback queue. A single word gets a single sound.
+      const words = text.split(/\s+/).filter(w => w.length > 0);
+      const howMany = Math.max(1, Math.min(words.length, 10));
+
+      const catWords = ["meow", "mrrrow", "nyaa", "mrrp", "mrow", "prrt", "mew"];
+      let result = [];
+      for (let i = 0; i < howMany; i++) {
+        result.push(catWords[Math.floor(Math.random() * catWords.length)]);
+      }
+      document.getElementById("catText").value = result.join(" ");
+
+      setStatus("Looking up real cat recordings...", false);
+      const sounds = await resolveSounds();
+
+      preparedSounds = [];
+      for (let i = 0; i < howMany; i++) {
+        preparedSounds.push(sounds.length > 0 ? sounds[Math.floor(Math.random() * sounds.length)] : null);
+      }
+
+      if (sounds.length > 0) {
+        setStatus(`Ready • ${howMany} real cat sound${howMany > 1 ? "s" : ""} prepared`, false);
+      } else {
+        setStatus(`Couldn't reach Wikimedia from this connection — try opening the downloaded file in a normal browser tab`, true);
+      }
+    }
+
+    async function playMeows() {
+      if (isPlaying) return;
+
+      if (preparedSounds.length === 0) {
+        setStatus("Translate first!", true);
+        return;
+      }
+
+      isPlaying = true;
+      const btn = document.getElementById("speakBtn");
+      btn.disabled = true;
+
+      let realCount = 0;
+      let failedCount = 0;
+
+      for (let i = 0; i < preparedSounds.length; i++) {
+        const sound = preparedSounds[i];
+        setStatus(`Playing ${i + 1} of ${preparedSounds.length}${sound ? ` (${sound.kind})` : ""}...`, false);
+
+        const ok = sound ? await playOne(sound.url) : false;
+        if (ok) {
+          realCount++;
+        } else {
+          await playFallbackBeep();
+          failedCount++;
+        }
+        await new Promise(resolve => setTimeout(resolve, 180));
+      }
+
+      if (failedCount === 0) {
+        setStatus("Finished 🐱", false);
+      } else if (realCount > 0) {
+        setStatus(`Finished — ${failedCount} clip(s) couldn't load`, true);
+      } else {
+        setStatus("Couldn't load any real audio — check your connection", true);
+      }
+
+      btn.disabled = false;
+      isPlaying = false;
+    }
+
+    function playOne(url) {
+      return new Promise((resolve) => {
+        const audio = new Audio(url);
+        audio.volume = 0.95;
+        let settled = false;
+        const finish = (success) => {
+          if (settled) return;
+          settled = true;
+          resolve(success);
+        };
+        audio.onended = () => finish(true);
+        audio.onerror = () => finish(false);
+
+        // Trim long real recordings down to a reasonable length instead of
+        // playing the whole thing.
+        const capTimer = setTimeout(() => {
+          try { audio.pause(); } catch (e) {}
+          finish(true);
+        }, MAX_CLIP_SECONDS * 1000);
+
+        audio.onended = () => { clearTimeout(capTimer); finish(true); };
+        audio.onerror = () => { clearTimeout(capTimer); finish(false); };
+
+        // Overall safety timeout in case a file hangs without firing any event.
+        setTimeout(() => finish(false), 8000);
+
+        audio.play().catch(() => { clearTimeout(capTimer); finish(false); });
+      });
+    }
+
+    // Warm up the lookup on load so the first click doesn't have to wait.
+    resolveSounds();
+  </script>
+</body>
+</html>
