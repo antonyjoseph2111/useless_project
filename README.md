@@ -62,17 +62,11 @@ For Hardware:
 N/A — no hardware components in this project.
 
 ### Project Demo
-
-**Video**
-[Add your demo video link here]
-*Explain what the video demonstrates — e.g. typing a sentence, translating it, and playing back the real cat sounds*
-
-**Additional Demos**
-[Add any extra demo materials/links]
+*https://realcattranslator.vercel.app/*
 
 ## Team Contributions
-- Pridhveeja K Vinod: [Specific contributions — e.g. UI/UX design, cat-word logic]
-- Antony Joseph: [Specific contributions — e.g. Wikimedia API integration, audio playback logic]
+- Pridhveeja K Vinod
+- Antony Joseph
 
 ---
 Made with ❤️ at TinkerHub Useless Projects
