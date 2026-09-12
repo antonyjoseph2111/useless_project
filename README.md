@@ -46,7 +46,7 @@ Or double-click the file / drag it into a browser tab. An internet connection is
 ### Project Documentation
 For Software:
 
-**Screenshots (Add at least 3)**
+**Screenshots**
 
 <img width="1280" height="640" alt="Real Cat Translator banner" src="https://github.com/antonyjoseph2111/useless_project/blob/main/Screenshot%202026-09-12%20051923.png" />
 
@@ -56,8 +56,7 @@ For Software:
 
 **Diagrams**
 
-![Workflow](Add your workflow/architecture diagram here)
-*User types text → JS splits it into words → each word maps to a random cat sound "type" → app queries Wikimedia Commons API for real file URLs → browser plays each clip in sequence (trimmed to a few seconds)*
+<img width="1280" height="640" alt="Real Cat Translator banner" src="https://github.com/antonyjoseph2111/useless_project/blob/main/Screenshot%202026-09-12%20052814.png" />
 
 For Hardware:
 N/A — no hardware components in this project.
